@@ -60,11 +60,8 @@ npm run lint           # ESLint with --fix
 - Hash-based routing for PWA compatibility
 
 ### Internationalization
-- JSON files in `src/locales/` (en.json is master)
-- Use descriptive keys: `"setup.players.playerCount"`
-- English is always the master language
-- For additional language, German is supported in most cases as well
-- Other languages are optional and provided by the community in later stages
+- Vue I18n with JSON files in `src/locales/` per project (`en.json` is master, `de.json` in most projects)
+- Detailed conventions are defined in `.github/instructions/i18n.instructions.md`
 
 ### Game Services Architecture
 - **Enums**: Game constants (PlayerColor, DifficultyLevel, CardName)
@@ -99,7 +96,8 @@ import createRouterMatomoTracking from '@brdgm/brdgm-commons/src/util/router/cre
 
 ## Code Style
 
-- **No semicolons**: ESLint rule `'semi': ['error', 'never']`
+- **No semicolons**: Never use semicolons at the end of lines in TypeScript/JavaScript files. ESLint rule: `'semi': ['error', 'never']`
+- **Single quotes**: Always use `'` instead of `"` for strings, imports, and object keys in TypeScript/JavaScript. ESLint rule: `'quotes': ['error', 'single']`
 - **TypeScript strict mode** with Vue 3 composition API
 - **Bootstrap classes** for styling (avoid custom CSS)
 - **Functional programming** patterns in game logic services
