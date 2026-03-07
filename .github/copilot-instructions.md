@@ -24,6 +24,10 @@ src/
 │   └── state.ts      # Main application state with Pinia + persistedstate
 ├── views/            # Route components (SetupGame, RoundPlayer, RoundBot)
 ├── components/       # Vue components
+│   ├── structure/    # Reusable structural/UI components (icons, footers, buttons)
+│   ├── setup/        # Setup-phase components
+│   └── round/        # Round/turn-phase components (game-specific subdirs may vary)
+├── util/             # Utility functions (NavigationState, color mappings, etc.)
 ├── locales/          # I18n JSON files (en.json, de.json, etc.)
 └── router/index.ts   # Vue Router with localStorage persistence
 ```
@@ -92,13 +96,15 @@ import createRouterMatomoTracking from '@brdgm/brdgm-commons/src/util/router/cre
 - **Unit tests**: Vitest for service classes and utilities
 - **E2E tests**: Playwright for full user workflows
 - **Coverage**: Istanbul coverage reporting
-- Tests mirror `src/` structure in `tests/unit/` and `tests/e2e/`
+- Tests mirror `src/` structure in `tests/unit/` (e.g. `tests/unit/services/`, `tests/unit/util/`)
+- **Assertions**: Use `chai` (`import { expect } from 'chai'`, e.g. `expect(result).to.eq(expected)`)
+- **Mock helpers**: Common mocks live in `tests/unit/helper/` (e.g. `mockState.ts`, `mockRound.ts`)
 
 ## Code Style
 
 - **No semicolons**: Never use semicolons at the end of lines in TypeScript/JavaScript files. ESLint rule: `'semi': ['error', 'never']`
 - **Single quotes**: Always use `'` instead of `"` for strings, imports, and object keys in TypeScript/JavaScript. ESLint rule: `'quotes': ['error', 'single']`
-- **TypeScript strict mode** with Vue 3 composition API
+- **TypeScript strict mode** with Vue 3 **Options API** (`defineComponent` with `props`, `computed`, `methods`; composition utilities like `useI18n()` are called inside `setup()`)
 - **Bootstrap classes** for styling (avoid custom CSS)
 - **Functional programming** patterns in game logic services
 
