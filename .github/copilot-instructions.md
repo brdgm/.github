@@ -91,6 +91,36 @@ import createRouterMatomoTracking from '@brdgm/brdgm-commons/src/util/router/cre
 "@brdgm/brdgm-commons": "^1.8.1"
 ```
 
+### Bootstrap Modals
+Always use the `ModalDialog` component from brdgm-commons when a Bootstrap modal is needed — never create custom modal markup:
+
+```typescript
+import ModalDialog from '@brdgm/brdgm-commons/src/components/structure/ModalDialog.vue'
+```
+
+```vue
+<ModalDialog id="myModal" :title="t('myModal.title')">
+  <template #body>
+    <p v-html="t('myModal.content')"/>
+  </template>
+</ModalDialog>
+```
+
+Key props: `id` (required), `title`, `sizeLg`/`sizeXl`, `scrollable`, `centered` (default `true`). Slots: `header`, `body`, `footer`.
+
+### Number Inputs
+Always use the `NumberInput` component from brdgm-commons when a numeric input field is needed — never use a plain `<input type="number">`:
+
+```typescript
+import NumberInput from '@brdgm/brdgm-commons/src/components/form/NumberInput.vue'
+```
+
+```vue
+<NumberInput v-model="score" :min="0" :max="100"/>
+```
+
+Key props: `min` (default `0`), `max` (default `9999`). Supports v-model and arithmetic expressions (e.g. `1 + 2 - 3`).
+
 ## Testing Strategy
 
 - **Unit tests**: Vitest for service classes and utilities
