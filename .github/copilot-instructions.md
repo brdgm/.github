@@ -98,7 +98,7 @@ import createRouterMatomoTracking from '@brdgm/brdgm-commons/src/util/router/cre
 - **Coverage**: Istanbul coverage reporting
 - Tests mirror `src/` structure in `tests/unit/` (e.g. `tests/unit/services/`, `tests/unit/util/`)
 - **Assertions**: Use `chai` (`import { expect } from 'chai'`, e.g. `expect(result).to.eq(expected)`)
-- **Mock helpers**: Common mocks live in `tests/unit/helper/` (e.g. `mockState.ts`, `mockRound.ts`)
+- **Mock helpers**: Each project has reusable `mockXxx` helper functions in `tests/unit/helper/` (e.g. `mockState.ts`, `mockRound.ts`, `mockCardDeck.ts`). When writing new unit tests, always check this folder first and reuse existing helpers instead of creating local helper functions within individual test files.
 
 ## Code Style
 
