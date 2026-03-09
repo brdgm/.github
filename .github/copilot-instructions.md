@@ -121,6 +121,33 @@ import NumberInput from '@brdgm/brdgm-commons/src/components/form/NumberInput.vu
 
 Key props: `min` (default `0`), `max` (default `9999`). Supports v-model and arithmetic expressions (e.g. `1 + 2 - 3`).
 
+### Enum Utilities
+Always use enum helpers from brdgm-commons — never use `Object.values()` or manual enum lists:
+
+```typescript
+import getAllEnumValues from '@brdgm/brdgm-commons/src/util/enum/getAllEnumValues'
+import getPrioritizedEnumValues from '@brdgm/brdgm-commons/src/util/enum/getPrioritizedEnumValues'
+```
+
+- `getAllEnumValues(MyEnum)` — returns all values of a string or number enum
+- `getPrioritizedEnumValues(MyEnum, preferredValues)` — returns enum values with preferred values first
+
+### Random Utilities
+Always use random helpers from brdgm-commons — never use `Math.random()` directly for picking enum values or rolling dice:
+
+```typescript
+import randomEnum from '@brdgm/brdgm-commons/src/util/random/randomEnum'
+import randomEnumDifferentValue from '@brdgm/brdgm-commons/src/util/random/randomEnumDifferentValue'
+import rollDice from '@brdgm/brdgm-commons/src/util/random/rollDice'
+```
+
+- `randomEnum(MyEnum)` — picks a random enum value
+- `randomEnumDifferentValue(MyEnum, currentValue)` — picks a random enum value excluding the given value(s)
+- `randomEnumMultiDifferentValue(MyEnum, count)` — picks multiple distinct random enum values
+- `rollDice(sides)` — rolls a die (1 to sides)
+- `rollDiceDifferentValue(sides, currentValue)` — rolls a die excluding the given value(s)
+- `rollDiceMultiDifferentValue(sides, count)` — rolls multiple distinct dice values
+
 ## Testing Strategy
 
 - **Unit tests**: Vitest for service classes and utilities
