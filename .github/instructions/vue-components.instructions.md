@@ -47,10 +47,11 @@ Rules for the split between `setup()` and the options:
 
 - No direct DOM access (`document.querySelector`, `getElementById`, `classList`) in components - use bindings, template refs (`ref="x"` + `this.$refs.x`) or brdgm-commons helpers (`showModal(id)`).
 - Modals: always `ModalDialog`; open via `data-bs-toggle="modal" data-bs-target="#id"` or `showModal(id)`. Unique IDs for modals in reusable components via `` `modal-${useId()}` `` (instead of `nanoid`).
-- Use `<button type="button">` for actions. Clickable non-button elements (e.g. the `ActionBox` that opens rules help) need `role="button"`, `tabindex="0"` and `@keydown.enter`. Do not nest clickable elements with the same handler. `<a href="#">` only together with `data-bs-toggle` (Bootstrap prevents the navigation) or `@click.prevent`.
+- Use `<button type="button">` for actions. Clickable non-button elements (e.g. the `ActionBox` that opens rules help) need `role="button"`, `tabindex="0"` and `@keydown.enter` (Sonar MouseEventWithoutKeyboardEquivalentCheck, found in almost every app). Do not nest clickable elements with the same handler. `<a href="#">` only together with `data-bs-toggle` (Bootstrap prevents the navigation) or `@click.prevent`.
 - `v-for` always with `:key`; use a stable domain key (card ID, enum value) where available. Index keys only for static lists that never change while the view is shown. Never `v-if` on the same element as `v-for`.
 - Keep templates simple - move complex expressions into computed properties.
-- Images: `alt=""` for decorative icons; meaningful `alt` if the image carries information not available as text.
+- Images: `alt=""` for decorative icons; meaningful `alt` if the image carries information not available as text. Inline `<svg>` icons need `aria-hidden="true"` (decorative) or an `aria-label` (Sonar ImgWithoutAltCheck).
+- Every `<input>`/`<select>` has an associated label: `id` on the input and `<label for="...">`, or the input nested inside the `<label>`; every `<label>` has text and belongs to a control (Sonar InputWithoutLabelCheck, S6853).
 - All user-visible texts via i18n (see `i18n.instructions.md`) - except the credits modal, the home page disclaimer and the debug mode label, which are intentionally English-only in all apps.
 - Scoped SCSS for component-specific styles; no inline `style` attributes except bound dynamic values; global styles only in `App.vue`.
 

@@ -27,6 +27,16 @@ Best practices for new code, based on an audit of the apps since 2024. They take
 
 - Test every service/util, including `NavigationState` and scoring formulas, with deterministic data (fixed card IDs via `fromPersistence`/mock helpers).
 - Reuse/extend the `mockXxx(params?)` helpers in `tests/unit/helper/` instead of local helper functions.
+- Use the most specific chai assertion (Sonar S5906, the most frequent issue in all apps): `expect(list).to.have.lengthOf(3)` instead of `expect(list.length).to.eq(3)`, `.to.be.true`/`.to.be.undefined` instead of `.to.eq(true)`/`.to.eq(undefined)`.
+- Always assert the expected error message (Sonar S5958): `expect(() => deck.draw()).to.throw('Pile is empty.')`, not a bare `.to.throw()`. `findMandatory` throws `No item with key: <key>`.
+- Unique test titles within a `describe` (Sonar S8754). Repeated tests that only differ in their input data go into one test with a loop over a data table (Sonar S5976).
+
+## Sonar Rules for Code
+
+SonarCloud analyzes every PR. Avoid these issues found repeatedly in the apps:
+
+- Existence checks with `.some(...)` instead of `.find(...)` or `.filter(...).length > 0` (S7754).
+- Default-exported functions are named: `export default function getStarLimit(...)`, never an anonymous `export default (...) => ...` (S7726).
 
 ## Do Not Copy (known smells in existing apps)
 
@@ -37,3 +47,5 @@ Best practices for new code, based on an audit of the apps since 2024. They take
 | `any` in helper methods (e.g. `getCardInfo(card: any)`) | `millennia` `DebugInfo.vue` | proper (union) types |
 | `// eslint-disable-line @typescript-eslint/no-unused-vars` | most apps since 2024 | `argsIgnorePattern: '^_'` in ESLint config |
 | VP formulas inline in components, untested | `seti`, `south-tigris-scholars` `FinalScoring.vue` | `util/getXxxVP.ts` with tests |
+| `expect(list.length).to.eq(n)` (Sonar S5906) | test specs in all apps | `expect(list).to.have.lengthOf(n)` |
+| `expect(fn).to.throw()` without message (Sonar S5958) | test specs in most apps | `.to.throw('expected message')` |

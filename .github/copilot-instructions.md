@@ -247,7 +247,7 @@ Rules:
 
 - **Unit tests**: Vitest (globals enabled - `describe`/`it` without import) for everything in `services/` and `util/`, including `NavigationState`. Vue components are usually not unit tested.
 - Tests mirror `src/` in `tests/unit/` (e.g. `tests/unit/services/CardDeck.spec.ts` with `describe('services/CardDeck', ...)`).
-- **Assertions**: `chai` (`import { expect } from 'chai'`, e.g. `expect(result).to.eq(expected)`, `.to.eql(...)` for deep equality).
+- **Assertions**: `chai` (`import { expect } from 'chai'`, e.g. `expect(result).to.eq(expected)`, `.to.eql(...)` for deep equality). Use the most specific assertion, as SonarCloud flags generic ones: `.to.have.lengthOf(n)` for lengths, `.to.throw('message')` with the expected message (see `typescript.instructions.md`).
 - **Mock helpers**: Reusable `mockXxx(params?)` functions in `tests/unit/helper/` (`mockState`, `mockTurn`/`mockRound`, `mockRouteLocation`, `mockCardDeck`, `mockBotPersistence`, ...), each with an optional `MockXxxParams` interface and sensible defaults. Always check this folder first and reuse/extend existing helpers instead of creating local helper functions in test files.
 - Use fixed card IDs via `CardDeck.fromPersistence(...)` / mock helpers to make tests deterministic.
 - **E2E**: `tests/e2e/smoke-test.spec.ts` plays through setup and at least one turn/round and aborts the game; keep it working when changing the flow.
