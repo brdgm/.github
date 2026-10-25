@@ -1,4 +1,4 @@
-# brdgm.me Solo Helper Applications - Copilot Instructions
+﻿# brdgm.me Solo Helper Applications - Copilot Instructions
 
 ## Architecture Overview
 
@@ -45,8 +45,9 @@ When looking for a template for a new feature, a pattern, or the skeleton of a n
 
 | Category | Apps (newest first) |
 |----------|---------------------|
-| ✅ **Preferred references** (2025–2026) | `bloomworks`, `south-tigris-scholars`, `south-tigris-inventors`, `south-tigris-wayfarers`, `galactic-cruise`, `maracaibo`, `seti`, `grand-austria-hotel` |
+| ✅ **Preferred references** (2025–2026) | `south-tigris-scholars`, `south-tigris-inventors`, `south-tigris-wayfarers`, `galactic-cruise`, `maracaibo`, `seti`, `grand-austria-hotel` |
 | ⚠️ Acceptable fallback (2024 – early 2025) | `clans-of-caledonia`, `thiefdom`, `millennia`, `civolution`, `barrage`, `age-of-innovation`, `apiary`, `el-burro`, `gaia-project`, `welcome-to-the-moon`, `fractal` |
+| 🚧 **In development - not a reference yet** | `bloomworks` (solo mode not finished) |
 | ❌ **Legacy - do not use as template** (2022–2023) | `dinogenics`, `carnegie`, `roll-for-the-galaxy`, `ultimate-railroads`, `praga-caput-regni`, `autobahn`, `weather-machine`, `skymines`, `joan-of-arc-orleans`, `terra-mystica`, `stroganov`, `ark-nova`, `rurik`, `monumental`, `blitzkrieg` |
 
 The creation date of an app can be checked with `git log --reverse --format=%ad --date=short` (first line) in the app repository. Apps created after this list was written are even better references.
@@ -57,21 +58,20 @@ Typical signs of a legacy implementation: store id `${name}.store`, no `tests/un
 
 | Need | Look at |
 |------|---------|
-| Minimal, clean app skeleton | `south-tigris-scholars`, `bloomworks` |
-| Card deck with draw/discard/reshuffle and persistence | `CardDeck.ts` in `bloomworks`, `south-tigris-scholars`, `seti` |
+| Minimal, clean app skeleton | `south-tigris-scholars`, `seti` |
+| Card deck with draw/discard/reshuffle and persistence | `CardDeck.ts` in `south-tigris-scholars`, `seti` |
 | Bot action with "Executed" / "Not Possible" steps (`.../bot/action/:action` routes) | `seti` (`RoundTurnBot.vue`), `south-tigris-scholars` (`TurnBot.vue`) |
 | Complex turn order, passing, `RouteCalculator` | `seti` (`RouteCalculator.ts`, `getTurnOrder.ts`), `grand-austria-hotel` |
-| Rounds + turns, season/round start screens | `bloomworks` (`RoundStart.vue`, `RoundTurnPlayer.vue`, `RoundTurnBot.vue`) |
+| Rounds + turns, round start screens | `grand-austria-hotel` (`RoundStart.vue`, `TurnPlayer.vue`, `TurnBot.vue`), `south-tigris-inventors` (`RoundStart.vue`) |
 | Pre/post steps or fixed phases per round | `grand-austria-hotel` (`RoundStart`, `RoundEnd`), `galactic-cruise` (`TurnPlayerAdvanceShips`, `EndOfRound`), `clans-of-caledonia`, `millennia` |
 | Setup randomizer (random tiles/goals) | `seti` (`getRandomGoldScoreTileSetup`, `SetupGameBoard.vue`), `galactic-cruise` (`getActionSetup`, `getDevelopmentSetup`) |
-| Several aggregated bot state objects | `bloomworks` (`BotPersistenceWrapper.ts`) |
 | Multiple selectable bot variants in one app | `maracaibo` (`jacques/`, `jean/` subfolders) |
 | Action display with rules help modal | `ActionBox.vue` + `components/*/action/Action*.vue` in `south-tigris-scholars`, `seti` |
 | Difficulty level slider, expansion toggles | `components/setup/DifficultyLevel.vue`, `ExpansionsSetup.vue` in `seti` |
 | Simple final scoring table (default) | `south-tigris-scholars`, `seti` (`GameEnd.vue`, `FinalScoring.vue`) |
-| End-of-game amount entry + anonymous game stats (Karma Games apps only) | `bloomworks` (`EndOfGameAmounts.vue`, `FinalScoring.vue`), `thiefdom`, `millennia`, `clans-of-caledonia` |
+| End-of-game amount entry + anonymous game stats (Karma Games apps only) | `clans-of-caledonia`, `thiefdom`, `millennia` (`EndOfGameAmounts.vue`, `FinalScoring.vue`) |
 | Rules / FAQ modals | `galactic-cruise` (`components/rules/`) |
-| Bot status side bar, editable values via modal + `NumberInput` | `bloomworks` (`SideBar.vue`) |
+| Bot status side bar (display only, no editable values) | `SideBar.vue` in `seti`, `galactic-cruise`, `south-tigris-scholars` |
 
 ## Consistency Across Apps
 
@@ -180,7 +180,7 @@ npm run generate-pwa-assets  # Generate PWA icons from public/img/icons/app-icon
 
 ### End Game Scoring and Game Statistics
 - Default: simple final scoring screen (`GameEnd.vue` + `components/scoring/FinalScoring.vue`): one column for the player and one for the bot, one row per scoring category of the base game. The player's VP are entered per category with `NumberInput`, the bot's amounts are pre-filled from tracked state or entered, and VP are calculated.
-- **Only apps for Karma Games titles** (`bloomworks`, `clans-of-caledonia`, `millennia`, `thiefdom`) record anonymous game statistics: `EndOfGameAmounts` → `EndOfGame`, `postGameStats(data, import.meta.env.VITE_STATS_FORM_URL, import.meta.env.VITE_STATS_FIELD_MAPPING)` in `FinalScoring.vue` `mounted()` guarded by `state.gameStatsSend`, and `stats-*` inputs in `deploy.yml`/`release.yml`. Do not add this to other apps.
+- **Only apps for Karma Games titles** (`clans-of-caledonia`, `millennia`, `thiefdom`) record anonymous game statistics: `EndOfGameAmounts` → `EndOfGame`, `postGameStats(data, import.meta.env.VITE_STATS_FORM_URL, import.meta.env.VITE_STATS_FIELD_MAPPING)` in `FinalScoring.vue` `mounted()` guarded by `state.gameStatsSend`, and `stats-*` inputs in `deploy.yml`/`release.yml`. Do not add this to other apps.
 
 ## brdgm-commons Integration
 

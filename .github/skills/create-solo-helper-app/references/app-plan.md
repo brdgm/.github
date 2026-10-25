@@ -1,4 +1,4 @@
-# Analyze and Plan a New Solo Helper App
+﻿# Analyze and Plan a New Solo Helper App
 
 Detailed procedure for "Phase B: Analyze and Plan" of the `create-solo-helper-app` skill. It builds on the Markdown transcriptions of the rules, cards and solo components from Phase A ([game-components.md](./game-components.md)). **No implementation before the plan is confirmed by the user.**
 
@@ -76,7 +76,7 @@ Prefer tracking more in the app; only leave state on the physical board when tra
 
 ## 6. Preserve Hints of the Physical Solo Mode
 
-When playing with physical components, the player sees certain information that helps planning (e.g. the back of the next solo card, the composition of the discard pile, the number of remaining cards until reshuffle/end of round, the direction indicator of the current card, the bot's track positions and collected items on the solo board). The app must preserve these hints - typically in the sidebar or the turn view. Examples: `seti` shows the decision direction of the current card and the drawn/total card count in the sidebar; `south-tigris-scholars` shows the number of blue/red cards in the discard pile (relevant for the color majority); `bloomworks` shows the remaining card stack. Do not show more than the physical game reveals.
+When playing with physical components, the player sees certain information that helps planning (e.g. the back of the next solo card, the composition of the discard pile, the number of remaining cards until reshuffle/end of round, the direction indicator of the current card, the bot's track positions and collected items on the solo board). The app must preserve these hints - typically in the sidebar or the turn view. Examples: `seti` shows the decision direction of the current card and the drawn/total card count in the sidebar; `south-tigris-scholars` shows the number of blue/red cards in the discard pile (relevant for the color majority). Do not show more than the physical game reveals.
 
 ## 7. Sidebar
 
@@ -87,7 +87,7 @@ Identify the information the player needs at a glance during the game, typically
 - deck information and preserved hints (see 6)
 - quick access to rules or occasional bot actions (e.g. "Caliph Card" button in `south-tigris-scholars`)
 
-Keep it compact (it floats right, ~145 px wide); editable values only where the player must correct the tracked state (modal + `NumberInput`, as in `bloomworks`).
+Keep it compact (it floats right, ~145 px wide). The sidebar is **display only**: all player input is asked in the context of the action being executed (turn views, action steps, round end), and mistakes are fixed with the back button. Do not add editable values or correction modals to the sidebar. Leave out information that is irrelevant for the player's decisions (e.g. internal positions or deck counts the physical game does not make useful), and prefer compact visual representations (e.g. small card icons for the cards played this round) over plain numbers.
 
 ## 8. Terminology and Rules Texts
 
@@ -119,6 +119,7 @@ Present the plan to the user in this structure (concise, tables preferred):
 13. **Icons** needed (by type, planned file names = `{icon-name}`s from `glossary.md`) - input for step 2.
 14. **Glossary EN/DE** (reference to `glossary.md`) and which rules passages are taken 1:1.
 15. **Open questions and alternatives** with a recommendation for each.
+16. **Implementation steps**: 3-10 reviewable steps, tailored to the game and built from the generic steps 1-6 of the skill. Merge small ones, and split large ones, especially the game flow. Per step: goal, scope, validation, and what the user reviews afterwards. Each step leaves a runnable app. Only one step is implemented per turn; the next step starts after the user confirms the reviewed one.
 
 ### Review Loop - Stop and Wait
 
@@ -136,6 +137,6 @@ Record the confirmed "App handling" decisions in the `components/<component>.md`
 Once the user has explicitly confirmed it, finalize **`<resources>/app-plan.md`** in `brdgm-resources` - never in the app repo. Remove the draft marker. The file is the reference for all later sessions:
 
 - Header: game, `appDeployName`, date of confirmation, links to the source/transcription files in the same folder.
-- The 15 sections of the plan template with the confirmed decisions (open questions replaced by the decisions taken).
-- **Implementation status**: checklist of steps 1-6 (and sub-steps 5a-5c), updated at the end of each step, plus a short list of open points/`TODO`s.
+- The 16 sections of the plan template with the confirmed decisions (open questions replaced by the decisions taken).
+- **Implementation status**: the checklist of the implementation steps from section 16 (step, status, date, short note), updated at the end of each step. Also a short list of open points/`TODO`s and open clarifications.
 - **Change log**: when decisions change during implementation, update the affected sections and add a dated entry (what changed and why).

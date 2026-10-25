@@ -10,7 +10,7 @@ Guides through creating a new `<appDeployName>-solo-helper` app in the same orde
 
 ## Golden Rules
 
-- **Use the latest apps as templates** (`bloomworks`, `south-tigris-scholars`/`-inventors`/`-wayfarers`, `galactic-cruise`, `maracaibo`, `seti`), never the legacy ones (`blitzkrieg`, `monumental`, `ark-nova`, ... see "Reference Implementations" in `copilot-instructions.md`).
+- **Use the latest apps as templates** (`south-tigris-scholars`/`-inventors`/`-wayfarers`, `galactic-cruise`, `maracaibo`, `seti`, `grand-austria-hotel`), never the legacy ones (`blitzkrieg`, `monumental`, `ark-nova`, ... see "Reference Implementations" in `copilot-instructions.md`). `bloomworks` is still in development and is **not** a reference yet.
 - The new app must look like the others: same skeleton, header/footer, home page, credits modal, footer buttons, button styles, shared i18n keys. Deviate only where the game's solo mode clearly needs a different UI or pattern.
 - **Copy the look & feel and the patterns, not the code smells**: when copying components or views from a reference app, apply the code guidelines in `.github/instructions/vue-components.instructions.md` and `typescript.instructions.md` (Options API split between `setup()`/`data()`/`computed`, `v-model` via computed get/set, typed emits without `eslint-disable`, `useId()` instead of `nanoid`, no DOM access, accessible clickable elements, VP formulas in `util/` with tests) and fix the smells listed in their "Do Not Copy" tables.
 - Reuse brdgm-commons components and utilities wherever possible.
@@ -25,14 +25,28 @@ Guides through creating a new `<appDeployName>-solo-helper` app in the same orde
 
 ## Working Mode
 
-The app is built **incrementally**: first Phase A and B (sources and their transcription, analysis, plan), then the implementation steps 1-6, usually over several sessions.
+The app is built **incrementally**: first Phase A and B (sources and their transcription, analysis, plan), then the **implementation steps defined in the plan**, usually over several sessions.
 
 `<resources>` below = `brdgm-resources/apps/<appDeployName>-solo-helper/`.
 
 1. **Make sure `brdgm-resources` is in the workspace** first. If it is missing, ask the user (ask-questions tool) to add it to the workspace (it is usually checked out next to the app repos) and wait - do not create the files elsewhere (e.g. in the app repo or the session folder) and do not continue on guessed rules.
-2. **Find the current phase/step**: are the transcriptions in `<resources>` complete? Is there a confirmed plan (`<resources>/app-plan.md` with its implementation status)? Inspect the target app folder (does it exist? `src/services/Cards.ts`? `CardDeck.ts`? which views and routes?) and ask the user which step to continue with if it's unclear.
-3. Work on **one step (or sub-step) at a time**, following the confirmed plan. At the end of each step: run the validation listed for it, update the implementation status in `<resources>/app-plan.md`, summarize what was done and what is still open (missing assets, unclear rules, `TODO`s), suggest commit messages (app repo and, if changed, `brdgm-resources`), and ask (with the ask-questions tool) before continuing with the next step. If the implementation reveals that the plan needs to change, propose the change, ask first and update `app-plan.md`.
-4. Keep the app **runnable after every step**: `npm run lint`, `npm run test:unit run` and `npm run build` must pass, and the e2e smoke test must reflect the currently implemented flow.
+2. **Find the current phase/step**: are the transcriptions in `<resources>` complete? Is there a confirmed plan (`<resources>/app-plan.md` with its implementation steps and status)? Inspect the target app folder (does it exist? `src/services/Cards.ts`? `CardDeck.ts`? which views and routes?) and ask the user which step to continue with if it's unclear.
+3. **Implementation steps**: the plan splits the implementation into **3-10 reviewable steps**, tailored to the game. Each step has:
+   - a goal;
+   - its scope (files/features);
+   - its validation;
+   - what the user can review afterwards (e.g. screens to try in `npm run dev`).
+
+   The generic steps 1-6 below are the building blocks: small ones can be merged (e.g. assets + card definitions), and large ones split (e.g. 5b game flow → player/bot turn skeleton, bot actions, round end/milestones). Each step leaves a runnable app.
+4. **One step per turn, then stop.** Implement exactly one implementation step of the plan. Never implement several steps or the whole app in one go. At the end of the step:
+   1. Run the validation listed for it.
+   2. Update the implementation status in `<resources>/app-plan.md`.
+   3. Summarize what was done and what is still open (missing assets, unclear rules - new ones go to `clarifications.md` and are asked - and `TODO`s), and what to review.
+   4. Suggest commit messages (app repo and, if changed, `brdgm-resources`).
+   5. **End the turn.**
+
+   Continue with the next step only after the user has explicitly confirmed the reviewed step (e.g. "step 2 confirmed, continue"). If the implementation reveals that the plan needs to change, propose the change, ask first and update `app-plan.md` (incl. the step list).
+5. Keep the app **runnable after every step**: `npm run lint`, `npm run test:unit run` and `npm run build` must pass, and the e2e smoke test must reflect the currently implemented flow.
 
 ## Phase A: Gather and Transcribe Sources
 
@@ -74,7 +88,7 @@ Analyze the transcribed rules, **every solo card** and **every solo component**,
 - setup screens, end game scoring, services/enums, needed icons, EN/DE glossary
 - open questions and alternative approaches with a recommendation
 
-Write the plan as a draft to `<resources>/app-plan.md`, ask the open questions (ask-questions tool, one field per concrete question with a recommended default), incorporate the answers, then **end the turn** and let the user review the file (see "Review Loop" in [app-plan.md](./references/app-plan.md)). Start step 1 only after the user has explicitly confirmed the plan; then remove the draft marker. `app-plan.md` (incl. an implementation status checklist of steps 1-6) is the reference for all later sessions.
+Write the plan as a draft to `<resources>/app-plan.md`, ask the open questions (ask-questions tool, one field per concrete question with a recommended default), incorporate the answers, then **end the turn** and let the user review the file (see "Review Loop" in [app-plan.md](./references/app-plan.md)). Start step 1 only after the user has explicitly confirmed the plan; then remove the draft marker. `app-plan.md` (incl. the implementation steps and their status) is the reference for all later sessions.
 
 ## Step 1: App Skeleton
 
@@ -102,7 +116,7 @@ Validate: `npm install`, `npm run lint`, `npm run test:unit run`, `npm run build
 The user usually extracts the icons from the rulebook PDF (card symbols, action icons, resources, ...). Support this step by:
 
 - Starting from the **icon list of the plan**: a checklist of all needed icons, grouped by type, with the planned file names (the `{icon-name}`s from `<resources>/glossary.md`). File names must match the **future enum values** (kebab-case), because they are loaded via `<AppIcon type="<type>" :name="enumValue"/>` → `src/assets/icons/<type>/<name>.<ext>`.
-- Format: **SVG** if the rulebook provides vector graphics (default in `south-tigris-*`), otherwise **WebP** (default in `bloomworks`, `seti`, `maracaibo`, `galactic-cruise`). Set the `extension` default in `AppIcon.vue` to the predominant format. Raster icons are typically ~50-200 px high (larger only for card-like images); the game box image is ~800 px.
+- Format: **SVG** if the rulebook provides vector graphics (default in `south-tigris-*`), otherwise **WebP** (default in `seti`, `maracaibo`, `galactic-cruise`). Set the `extension` default in `AppIcon.vue` to the predominant format. Raster icons are typically ~50-200 px high (larger only for card-like images); the game box image is ~800 px.
 - Common icons in `src/assets/icons/`: `help-semi-transparent.webp` (copy from a reference app, used by `ActionBox`), plus game-specific ones.
 - If the user asks for it, help extracting images from the PDFs in `<resources>/rules/` with available tools; otherwise just provide the checklist and verify that the files the user added match the expected names.
 
@@ -113,7 +127,7 @@ Validate: check the list of missing/unexpected files against the checklist.
 - `services/Card.ts`: `Card` interface (`id` + card properties incl. information on the card back, if relevant) and `CardAction` interface (`action: Action` + optional parameters) as defined in the plan's card table. `id` is a `number` for purely numeric identifiers, otherwise a `string` (e.g. `'A1'`).
 - `services/Cards.ts`: static array with **all cards** exactly as printed (source: `<resources>/cards/<deck>-cards.md`), each with its **unique identifier** as `id` (printed number/code, or the own scheme from the plan - documented in a comment), a `Map` for lookup, `get(id)` via `findMandatory`, `getAll(...)` (optionally filtered by card type/deck).
 - Enums needed by the cards in `services/enum/` (`Action`, `CardType`, colors, ...), string values kebab-case matching icon names.
-- **Multiple decks**: either one `Card`/`Cards` with a `CardType`/`DeckType` enum (`bloomworks`, `grand-austria-hotel`) or separate card classes per deck/bot (`maracaibo`: `jacques/JacquesCards.ts`, `jean/JeanCards.ts`; `seti`: `Cards.ts` + `Objectives.ts`).
+- **Multiple decks**: either one `Card`/`Cards` with a `CardType`/`DeckType` enum (`grand-austria-hotel`, `south-tigris-inventors`) or separate card classes per deck/bot (`maracaibo`: `jacques/JacquesCards.ts`, `jean/JeanCards.ts`; `seti`: `Cards.ts` + `Objectives.ts`).
 - Unit test `tests/unit/services/Cards.spec.ts`: `get(id)` and expected card counts per deck.
 
 Validate: lint, unit tests. Ask the user to double check card data against the physical cards/rulebook (summarize counts per type).
@@ -133,7 +147,7 @@ Implement step by step, each sub-step runnable and committed separately.
 
 ### 5a. Setup Screens
 
-1. **General game setup** (`SetupApp.vue`/`SetupGame.vue`): options stored in `state.setup` - e.g. `components/setup/DifficultyLevel.vue` (range slider), `ExpansionsSetup.vue` (switches, `getAllEnumValues`), start player, bot mode, player color. Copy setup components from `seti` / `south-tigris-scholars` / `bloomworks`.
+1. **General game setup** (`SetupApp.vue`/`SetupGame.vue`): options stored in `state.setup` - e.g. `components/setup/DifficultyLevel.vue` (range slider), `ExpansionsSetup.vue` (switches, `getAllEnumValues`), start player, bot mode, player color. Copy setup components from `seti` / `south-tigris-scholars`.
 2. **Bot setup instructions** (`SetupBot.vue`, sometimes `SetupGameBoard.vue`): numbered `setupBot.instructions.*` list as in the solo rulebook (texts depending on difficulty/expansions, wording from the EN/DE rulebooks, components managed by the app marked as such - in particular the solo cards and the solo board or the parts of it that are not needed anymore; the parts still needed physically are named explicitly), "rule changes" summary in `alert alert-info`, "Start Game" button that initializes the bot persistence (`CardDeck.new(...)`, ...) and stores the first turn/round, then routes to the first game screen.
 3. **Optional randomizer** to help setting up the board (random tiles/goals/setup cards) using `randomEnum`/`rollDice`/lodash `shuffle`, generated when leaving the general setup and stored in `state.setup` so it survives reloads: see `seti` (`getRandomGoldScoreTileSetup` in `SetupApp.vue`, displayed by `GoldScoringTiles.vue` in `SetupGameBoard.vue`), `galactic-cruise` (`getActionSetup`, `getDevelopmentSetup`, `components/setup/GameSetup.vue`).
 
@@ -146,7 +160,7 @@ Implement the routes and views of the confirmed plan. The game flow references (
 | Game flow | Reference |
 |-----------|-----------|
 | Alternating player/bot turns, no rounds (`/turn/:turn/player\|bot`) | `south-tigris-scholars`, `-wayfarers`, `-inventors` |
-| Rounds with turns until passing, round start screen | `bloomworks` (`RoundStart`, `RoundTurnPlayer`, `RoundTurnBot`) |
+| Rounds with turns until passing, round start screen | `grand-austria-hotel` (`RoundStart`, `TurnPlayer`, `TurnBot`), `south-tigris-inventors` (`RoundStart`) |
 | Rounds with complex turn order/passing, `RouteCalculator` | `seti` (`getTurnOrder`, `RouteCalculator`), `grand-austria-hotel` |
 | Additional pre/post steps per round | `grand-austria-hotel` (`RoundStart`, `RoundEnd`), `galactic-cruise` (`TurnPlayerAdvanceShips`, `TurnBotAdvanceShips`, `EndOfRound`), `clans-of-caledonia` (`RoundPreparation`, `RoundProduction`, `RoundScoring`) |
 | Fixed phases per round | `millennia` (`PhaseADrafting` … `PhaseGUpkeep`) |
@@ -170,12 +184,12 @@ Default (all apps except Karma Games) - a **simple final scoring screen**:
 
 ## Step 6: Game Statistics (Karma Games only)
 
-Only for games published by **Karma Games** (`bloomworks`, `clans-of-caledonia`, `millennia`, `thiefdom`). Skip for all other publishers.
+Only for games published by **Karma Games** (`clans-of-caledonia`, `millennia`, `thiefdom`). Skip for all other publishers.
 
 - Two-step end: `EndOfGameAmounts.vue` (enter amounts, stored in `state.finalScoringAmount`) → `EndOfGame.vue` with `FinalScoring.vue`.
 - In `FinalScoring.vue` `mounted()`: if `!state.gameStatsSend`, build a flat stats object (`version`, difficulty/mode, player and bot VP per category, per-round/turn statistics) and call `postGameStats(stats, import.meta.env.VITE_STATS_FORM_URL, import.meta.env.VITE_STATS_FIELD_MAPPING)`, then set `state.gameStatsSend = true`. `resetGame()` resets `gameStatsSend`.
-- Per-turn stats recorded while playing (optional fields on the turn, e.g. `util/recordBotRoundTurnStats.ts` in `bloomworks`) with unit tests.
-- Workflows `deploy.yml` and `release.yml` need the `stats-forms-url`/`stats-field-mapping` inputs (copy from `bloomworks`); the Google Form and repo variables `VITE_STATS_FORM_URL`/`VITE_STATS_FIELD_MAPPING` are set up manually by the user - list the stats field names for the form.
+- Per-turn stats recorded while playing (optional fields on the turn, small helpers in `util/`) with unit tests.
+- Workflows `deploy.yml` and `release.yml` need the `stats-forms-url`/`stats-field-mapping` inputs (copy from `clans-of-caledonia`); the Google Form and repo variables `VITE_STATS_FORM_URL`/`VITE_STATS_FIELD_MAPPING` are set up manually by the user - list the stats field names for the form.
 
 ## Finalize and Publish
 

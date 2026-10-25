@@ -1,6 +1,6 @@
 # Step 1: Skeleton Files
 
-How to create the skeleton from a recent reference app (`bloomworks`, `south-tigris-scholars`, `seti`, ...). `<x>` = `appDeployName` (e.g. `bloomworks`), repo folder = `<x>-solo-helper`.
+How to create the skeleton from a recent reference app (`south-tigris-scholars`, `seti`, ...). `<x>` = `appDeployName` (e.g. `seti`), repo folder = `<x>-solo-helper`.
 
 Get the file list of the reference app with `git -C <reference-app> ls-files`. The rulebooks, transcriptions and the plan are in `brdgm-resources/apps/<x>-solo-helper/` - never copy them into the app repo.
 
@@ -32,7 +32,7 @@ Get the file list of the reference app with `git -C <reference-app> ls-files`. T
 | `README.md` | Title, badge URLs (`brdgm/<x>-solo-helper`, `brdgm_<x>-solo-helper`), `https://brdgm.me/<x>/`, locales link |
 | `sonar-project.properties` | `sonar.projectKey=brdgm_<x>-solo-helper` |
 | `src/App.vue` | Only the credits modal: BGG link, Game design, Artist, Publisher (+ URL), GitHub release/source links with `<x>-solo-helper`. Everything else stays identical. |
-| `src/views/AppHome.vue` | Game image `@/assets/game-<x>.webp` + BGG link, `home.play*` paragraphs, feedback paragraph (BGG thread + GitHub; commented out until the thread exists), disclaimer (with publisher permission: see `bloomworks`; unofficial: see `south-tigris-scholars`), prototype alert only for unpublished games, router link to the setup route. Remove styles not used. |
+| `src/views/AppHome.vue` | Game image `@/assets/game-<x>.webp` + BGG link, `home.play*` paragraphs, feedback paragraph (BGG thread + GitHub; commented out until the thread exists), disclaimer (with publisher permission: see `clans-of-caledonia`; unofficial: see `south-tigris-scholars`), prototype alert only for unpublished games, router link to the setup route. Remove styles not used. |
 | `public/img/icons/app-icon.png` (+ `resources/app-icon.psd`), `public/favicon.ico`, `public/img/icons/favicon.svg` | New app icon, then `npm run generate-pwa-assets` |
 | `src/assets/game-<x>.webp` | Game box image (~800 px) |
 
