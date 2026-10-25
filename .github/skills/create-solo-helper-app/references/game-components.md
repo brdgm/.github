@@ -23,6 +23,7 @@ brdgm-resources/apps/<appDeployName>-solo-helper/
 │   └── <component>.md         # solo board, solo mats, bot tiles, markers, reference cards, ...
 ├── images/                    # optional: page renders/crops needed for later lookup (WebP)
 ├── glossary.md                # EN/DE terms and icons
+├── clarifications.md          # rule uncertainties: decided ones and those to be cleared up later
 └── app-plan.md                # confirmed plan from Phase B (see app-plan.md)
 ```
 
@@ -65,6 +66,20 @@ Every file starts with:
 - Lists and tables as Markdown lists/tables; rule boxes and sidebars as blockquotes with their title in bold.
 - **Inline icons** as `{icon-name}`: kebab-case English name, identical in EN and DE files, defined in the icons table of `glossary.md`. These names become the future enum values and icon file names (`src/assets/icons/<type>/<name>.<ext>`), so choose them carefully.
 - Bold/italic only where the rulebook emphasizes terms.
+- **Uncertainties** (unclear or contradictory rules, EN/DE differences, illegible text, unclear icons, assumptions read from images, invented icon names): mark them in place with `TODO (C<n>): <short question>` and add each one to `clarifications.md` (see "Clarifications" below). Never leave an uncertainty only as a `TODO` in a file, or only in a subagent report - the user must not discover it by chance.
+
+## Clarifications (`clarifications.md`)
+
+Central list of all rule uncertainties, one entry per item:
+
+| id | question | sources (file/section, page) | options | status | decision / assumption used |
+|----|----------|------------------------------|---------|--------|----------------------------|
+| C1 | ... | `components/solo-board.md` "Rondel", p. 19 | A: ..., B: ... | decided / open (clear up later) | ... |
+
+- **Ask the user about every entry** with the ask-questions tool at the end of Phase A, and again for new entries during/after Phase B (plan) and whenever new ones come up during implementation. Use one field per entry. Offer the concrete options with a recommended default, plus the option **"Add to clarification list (clear up later)"**.
+- **Decided**: set the status to `decided`, record the decision (and its source, e.g. "user", "designer on BGG <link>"), and replace the `TODO (C<n>)` in the transcription with a note `(C<n>: <decision>)`.
+- **Clear up later**: set the status to `open`, and record the assumption the app uses until then (the recommended option, unless the user says otherwise). Keep the `TODO (C<n>)` marker. Open entries are listed in the implementation status of `app-plan.md`, and are asked again at "Finalize and Publish".
+- Before ending a phase or step, search `<resources>` for `TODO` and check that every marker has an entry in `clarifications.md` that was asked.
 
 ## Card Files (`cards/<deck>-cards.md`)
 
@@ -72,8 +87,10 @@ Derived from the card sheets (rulebook pages, print-and-play files or scans/phot
 
 - Short intro: deck name, number of cards, source pages, reference to the rules section about deck building/drawing/reshuffling (`solo-rules-en.md` section name).
 - **Identifier scheme** (printed identifier or own scheme, see `app-plan.md`).
-- **Card table**, one row per card: `id` | deck/type/difficulty | back (color, symbols, indicators) | front: actions in printed order with `{icon}` names and parameters | notes (conditions, fallbacks, unclear icons marked with `TODO`).
-- Text printed on the cards: verbatim, with an EN and a DE column if the cards are language-dependent.
+- **Card table**, one row per card: `id` | deck/type/difficulty | back (color, symbols, indicators) | front: actions in printed order with `{icon}` names and parameters | notes (conditions, fallbacks, unclear icons marked with `TODO (C<n>)`).
+- Text printed on the cards: verbatim, with an EN and a DE column if the cards are language-dependent and both are available.
+- **Rulebook text first**: if the rulebook explains every icon/action of the cards (usually with the same content as the card text plus extra information), the app shows that **full rulebook text** (EN and DE from `rules/*-en.md`/`*-de.md`) in the action help modal. Card texts are then only for cross-checking. Add a "Rules Texts per Action" table to the card file (icon → rulebook paragraph EN/DE, page). Do not derive translations for card texts the rulebook already covers.
+- If only one language of the cards is available, take the other language from example card images in the rulebook where they exist. Derive texts from the other language (using the rulebook terms) only where nothing else exists, and mark them as `derived` for review.
 
 ## Component Files (`components/<component>.md`)
 
@@ -94,6 +111,6 @@ One file per solo component besides the solo cards (solo board, solo mat, bot ti
 2. Render the pages to images and **compare** them with the extracted text - extraction often mixes columns, drops icons, breaks umlauts/ligatures and loses tables. Fix the Markdown accordingly. Look at the page images for card sheets, icon glossaries, setup diagrams and solo boards.
 3. Write the files following the conventions above; resolve every inline icon to a `{icon-name}` in the glossary.
 4. **Verify completeness**: every page of the source has its page marker, no rules section is missing, EN and DE files have the same structure, every card of every deck is in the card table.
-5. List uncertainties (illegible text, unclear icons, differences between EN and DE) and ask the user. Ask the user to spot check the transcription.
+5. Collect **all** uncertainties (illegible text, unclear icons, differences between EN and DE, assumptions from images, invented icon names, and every uncertainty reported by subagents) in `clarifications.md`, mark them with `TODO (C<n>)`, and **ask the user about each one** (see "Clarifications"). Ask the user to spot check the transcription. When delegating transcription to subagents, instruct them to mark uncertainties with `TODO` and to report them; then add the reported ones to `clarifications.md`.
 
 Later phases use these files as the primary source. Go back to the PDFs/page images only for visual questions. If an error in a transcription is found later, fix the Markdown file. Suggest a commit message for `brdgm-resources` after the transcription.

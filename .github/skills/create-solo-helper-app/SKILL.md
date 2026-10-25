@@ -14,14 +14,14 @@ Guides through creating a new `<appDeployName>-solo-helper` app in the same orde
 - The new app must look like the others: same skeleton, header/footer, home page, credits modal, footer buttons, button styles, shared i18n keys. Deviate only where the game's solo mode clearly needs a different UI or pattern.
 - **Copy the look & feel and the patterns, not the code smells**: when copying components or views from a reference app, apply the code guidelines in `.github/instructions/vue-components.instructions.md` and `typescript.instructions.md` (Options API split between `setup()`/`data()`/`computed`, `v-model` via computed get/set, typed emits without `eslint-disable`, `useId()` instead of `nanoid`, no DOM access, accessible clickable elements, VP formulas in `util/` with tests) and fix the smells listed in their "Do Not Copy" tables.
 - Reuse brdgm-commons components and utilities wherever possible.
-- **Never invent solo rules** - everything comes from the official solo rulebook and the solo cards. Ask if something is unclear.
+- **Never invent solo rules** - everything comes from the official solo rulebook and the solo cards. Mark every rule uncertainty with `TODO (C<n>)` and collect it in `<resources>/clarifications.md`. **Proactively ask the user about each one** - at the end of Phase A, with the plan, and whenever new ones come up. The user either decides, or has it added to the list to be cleared up later (the app then uses a documented assumption). Never leave an uncertainty for the user to discover by chance, and never decide one silently.
 - **Game resources outside the app repo**: rulebook PDFs, card scans, their transcriptions, the glossary and the app plan live in the private repo `brdgm-resources` in `apps/<appDeployName>-solo-helper/` (see "Game Resources" in `copilot-instructions.md`) - **never in the public app repo**. The app never references these files.
 - **Transcribe first**: rulebook PDFs, solo cards and solo components are transcribed once to Markdown in the game resources folder; all later steps look things up there.
 - **Not a card flipper**: the app takes over as many bot decisions and as much bot bookkeeping (resources, VP, tracks, ...) as possible. The player only gives input where the board must be inspected or the input results from the player's own actions.
 - **Replace the solo components**: ideally the player needs neither the solo cards nor the solo board (solo mat, bot tiles, markers, ...). Only parts that are really needed (e.g. a place for items collected by the bot) remain physical, and the app says exactly which.
 - **Preserve the hints of the physical solo mode** (e.g. the visible back of the next solo card, discard pile composition) - but do not reveal more than the physical game.
 - **Use the rulebook wording**: terms and short rules fragments 1:1 from the official English (mandatory) and German (if available) rulebooks.
-- **Plan first**: no implementation before the plan from Phase B is confirmed by the user.
+- **Plan first**: no implementation before the plan from Phase B is **explicitly confirmed** by the user. After writing the draft plan and resolving the open questions, **stop and end the turn** so the user can review `app-plan.md` - never continue to step 1 in the same turn.
 
 ## Working Mode
 
@@ -60,7 +60,7 @@ Then **transcribe the sources to Markdown** next to the source files in `<resour
 - `components/`: solo board and other solo components with all areas and their purpose.
 - `glossary.md`: EN/DE terms and icon names (`{icon-name}`, future enum values/icon file names).
 
-Verify completeness against the PDFs, list uncertainties and ask the user to spot check. Nothing of this goes into the app repo.
+Verify completeness against the PDFs. Collect all uncertainties in `clarifications.md` and ask the user about each of them (decide, or add to the list to clear up later - see "Clarifications" in [game-components.md](./references/game-components.md)), and ask the user to spot check. Nothing of this goes into the app repo.
 
 ## Phase B: Analyze and Plan
 
@@ -74,7 +74,7 @@ Analyze the transcribed rules, **every solo card** and **every solo component**,
 - setup screens, end game scoring, services/enums, needed icons, EN/DE glossary
 - open questions and alternative approaches with a recommendation
 
-Present the plan, then **ask for confirmation and guidance** on the open questions and best approaches (ask-questions tool). Save the confirmed plan as `<resources>/app-plan.md` (incl. an implementation status checklist of steps 1-6) - it is the reference for all later sessions. Start step 1 only after the plan is confirmed.
+Write the plan as a draft to `<resources>/app-plan.md`, ask the open questions (ask-questions tool, one field per concrete question with a recommended default), incorporate the answers, then **end the turn** and let the user review the file (see "Review Loop" in [app-plan.md](./references/app-plan.md)). Start step 1 only after the user has explicitly confirmed the plan; then remove the draft marker. `app-plan.md` (incl. an implementation status checklist of steps 1-6) is the reference for all later sessions.
 
 ## Step 1: App Skeleton
 
@@ -165,7 +165,7 @@ Then implement in this order, always supporting **both player turns and bot turn
 ### 5c. End Game Scoring
 
 Default (all apps except Karma Games) - a **simple final scoring screen**:
-- `GameEnd.vue`/`EndOfGame.vue` with `components/scoring/FinalScoring.vue`: table with the bot's (and if useful the player's) final amounts - values tracked by the app are pre-filled/calculated, only the rest is entered via `NumberInput` - VP computed per the solo rules, total, plus difficulty level display; `FooterButtons endGameButtonType="endGame"`. See `south-tigris-scholars`, `seti` for the UI - but put non-trivial VP formulas into `util/getXxxVP.ts` with unit tests (as in `south-tigris-wayfarers` `getCardVP.ts`) instead of inline in the component.
+- `GameEnd.vue`/`EndOfGame.vue` with `components/scoring/FinalScoring.vue`: table with **one column for the player and one for the bot** and **one row per scoring category** of the base game's end game scoring (plus end-game VP from other sources, e.g. special tiles) - the player's VP are always entered per category via `NumberInput` (never just a total), the bot's values tracked by the app are pre-filled/calculated, only the rest is entered - VP computed per the solo rules, totals for both, plus difficulty level display; `FooterButtons endGameButtonType="endGame"`. See `seti`, `south-tigris-scholars` for the UI - but put non-trivial VP formulas into `util/getXxxVP.ts` with unit tests (as in `south-tigris-wayfarers` `getCardVP.ts`) instead of inline in the component.
 - Optionally a separate `EndOfGameAmounts.vue` + `FinalAmounts.vue` step if many values must be entered first (`grand-austria-hotel`).
 
 ## Step 6: Game Statistics (Karma Games only)
@@ -181,7 +181,7 @@ Only for games published by **Karma Games** (`bloomworks`, `clans-of-caledonia`,
 
 1. Full validation: `npm run lint`, `npm run test:unit run`, `npm run build`, `npm run test:e2e`; play a complete game in `npm run dev` (back button, reload in the middle of a game, end of game, zoom, language switch, debug mode).
 2. Check `en.json`/`de.json` completeness and wording against the EN/DE rulebooks (`<resources>/rules/`, `glossary.md`), remove `TODO`s and unused keys/icons/dependencies (e.g. `nanoid` if copied from a reference app).
-3. Check against the confirmed plan (`<resources>/app-plan.md`): everything the plan assigns to the app is automated, all preserved hints and sidebar contents are present, every solo card is defined with its identifier, the solo cards and the solo board are superfluous except the parts documented as still needed (and named in the bot setup instructions). Update the implementation status and record deviations in the plan.
+3. Check against the confirmed plan (`<resources>/app-plan.md`): everything the plan assigns to the app is automated, all preserved hints and sidebar contents are present, every solo card is defined with its identifier, the solo cards and the solo board are superfluous except the parts documented as still needed (and named in the bot setup instructions). Update the implementation status and record deviations in the plan. Ask the user again about all `open` entries in `clarifications.md`.
 4. Make sure the app repo contains no rulebook PDFs, scans or transcriptions, and nothing in the app (code, tests, build) references `brdgm-resources`.
 5. Review the code against `vue-components.instructions.md` and `typescript.instructions.md` (no `eslint-disable` for emits, no `any`/`!`, no DOM access, `v-model` via computed, scoring formulas tested). Optionally run a type check with `npx -p typescript@5.9 -p vue-tsc vue-tsc --noEmit` (current `vue-tsc` cannot load TypeScript 6 yet).
 6. List the manual steps for the user:

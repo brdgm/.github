@@ -179,7 +179,7 @@ npm run generate-pwa-assets  # Generate PWA icons from public/img/icons/app-icon
 - Detailed conventions: `.github/instructions/i18n.instructions.md`.
 
 ### End Game Scoring and Game Statistics
-- Default: simple final scoring screen (`GameEnd.vue` + `components/scoring/FinalScoring.vue`) where the bot's amounts are entered with `NumberInput` and VP are calculated.
+- Default: simple final scoring screen (`GameEnd.vue` + `components/scoring/FinalScoring.vue`): one column for the player and one for the bot, one row per scoring category of the base game. The player's VP are entered per category with `NumberInput`, the bot's amounts are pre-filled from tracked state or entered, and VP are calculated.
 - **Only apps for Karma Games titles** (`bloomworks`, `clans-of-caledonia`, `millennia`, `thiefdom`) record anonymous game statistics: `EndOfGameAmounts` → `EndOfGame`, `postGameStats(data, import.meta.env.VITE_STATS_FORM_URL, import.meta.env.VITE_STATS_FIELD_MAPPING)` in `FinalScoring.vue` `mounted()` guarded by `state.gameStatsSend`, and `stats-*` inputs in `deploy.yml`/`release.yml`. Do not add this to other apps.
 
 ## brdgm-commons Integration

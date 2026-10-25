@@ -98,7 +98,7 @@ Keep it compact (it floats right, ~145 px wide); editable values only where the 
 
 - General setup options: difficulty levels (and what they change), expansions, modes/variants, start player, player color, ...
 - Bot setup instructions: differences to a 2-player setup, which solo components (cards, solo board or parts of it, markers) the player does not need because the app manages them and which are still needed, opportunities for a randomizer.
-- End game scoring of the bot (and player): which values are already tracked by the app (pre-filled, no input) and which must be entered. Game statistics only for Karma Games apps.
+- End game scoring: **always both the player and the bot**, one row per scoring category of the base game's end game scoring (plus end-game VP from other sources the base rules mention elsewhere, e.g. special board tiles, expansions), one column each for player and bot - as in `seti` and `south-tigris-scholars`. Player values are entered per category with `NumberInput` (never only a total). For the bot: which values are already tracked by the app (pre-filled/calculated, no input), which must be entered, and which categories the bot does not score. Game statistics only for Karma Games apps.
 
 ## Plan Template
 
@@ -114,17 +114,26 @@ Present the plan to the user in this structure (concise, tables preferred):
 8. **Bot actions**: list of `Action` values with the automated logic and the remaining player input; "if not possible" handling.
 9. **Sidebar** contents and **preserved physical hints**.
 10. **Setup screens** (general setup, bot setup instructions incl. needed/not needed solo components, randomizer).
-11. **End game scoring** (tracked vs. entered values; statistics if Karma Games).
+11. **End game scoring**: table scoring category | player (entered) | bot (calculated / entered / not scored); statistics if Karma Games.
 12. **Services/util/enums** draft (names and responsibilities).
 13. **Icons** needed (by type, planned file names = `{icon-name}`s from `glossary.md`) - input for step 2.
 14. **Glossary EN/DE** (reference to `glossary.md`) and which rules passages are taken 1:1.
 15. **Open questions and alternatives** with a recommendation for each.
 
-Then ask for confirmation and guidance with the ask-questions tool: confirm or correct the plan, decide the open questions/alternatives (e.g. how much board state to track, which solo board parts remain physical, view granularity, how to handle rare cases). Record the confirmed "App handling" decisions in the `components/<component>.md` files.
+### Review Loop - Stop and Wait
+
+The plan is reviewed by the user **in the file**, not only in the chat:
+
+1. Write the complete plan as a **draft** to `<resources>/app-plan.md` (marked `DRAFT - not confirmed` at the top), with all open questions and a recommendation for each in section 15.
+2. Ask the open questions with the ask-questions tool: **one field per concrete open question**, each with a recommended default. This covers all plan decisions **and all rule uncertainties** - every `TODO (C<n>)` in `<resources>` and every open entry in `clarifications.md`, including assumptions you made while writing the plan. Each rule uncertainty also offers "Add to clarification list (clear up later)". No vague catch-all fields like "Other remarks" - the user gives general feedback in the chat after reading the file.
+3. Incorporate the answers into the draft (decisions table in section 15, affected sections), and into `clarifications.md` and the transcription `TODO`s. If an answer raises new questions, list them in section 15. Before ending the turn, search `<resources>` for `TODO` - every remaining marker must be an `open` entry in `clarifications.md` that the user chose to clear up later.
+4. **End the turn**: summarize what changed, point to the draft file and ask the user to review it and confirm. Do **not** continue with step 1 in the same turn, even if all questions are answered - only an explicit confirmation of the plan by the user (e.g. "plan confirmed, start step 1") starts the implementation.
+
+Record the confirmed "App handling" decisions in the `components/<component>.md` files.
 
 ## Save the Plan
 
-Save the confirmed plan as **`<resources>/app-plan.md`** in `brdgm-resources` - never in the app repo. It is the reference for all later sessions:
+Once the user has explicitly confirmed it, finalize **`<resources>/app-plan.md`** in `brdgm-resources` - never in the app repo. Remove the draft marker. The file is the reference for all later sessions:
 
 - Header: game, `appDeployName`, date of confirmation, links to the source/transcription files in the same folder.
 - The 15 sections of the plan template with the confirmed decisions (open questions replaced by the decisions taken).
