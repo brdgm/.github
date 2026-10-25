@@ -119,7 +119,7 @@ Present the plan to the user in this structure (concise, tables preferred):
 13. **Icons** needed (by type, planned file names = `{icon-name}`s from `glossary.md`) - input for step 2.
 14. **Glossary EN/DE** (reference to `glossary.md`) and which rules passages are taken 1:1.
 15. **Open questions and alternatives** with a recommendation for each.
-16. **Implementation steps**: 3-10 reviewable steps, tailored to the game and built from the generic steps 1-6 of the skill. Merge small ones, and split large ones, especially the game flow. Per step: goal, scope, validation, and what the user reviews afterwards. Each step leaves a runnable app. Only one step is implemented per turn; the next step starts after the user confirms the reviewed one.
+16. **Implementation steps**: 3-10 reviewable steps, tailored to the game and built from the generic steps 1-6 of the skill. Merge small ones, and split large ones, especially the game flow. Per step: goal, scope, validation (always including lint, unit tests, build and the e2e smoke test, extended to the flow of the step), and what the user reviews afterwards. Each step leaves a runnable app. Only one step is implemented per turn; the next step starts after the user confirms the reviewed one.
 
 ### Review Loop - Stop and Wait
 

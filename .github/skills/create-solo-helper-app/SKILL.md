@@ -46,7 +46,9 @@ The app is built **incrementally**: first Phase A and B (sources and their trans
    5. **End the turn.**
 
    Continue with the next step only after the user has explicitly confirmed the reviewed step (e.g. "step 2 confirmed, continue"). If the implementation reveals that the plan needs to change, propose the change, ask first and update `app-plan.md` (incl. the step list).
-5. Keep the app **runnable after every step**: `npm run lint`, `npm run test:unit run` and `npm run build` must pass, and the e2e smoke test must reflect the currently implemented flow.
+5. Keep the app **runnable after every step**: `npm run lint`, `npm run test:unit run`, `npm run build` and `npm run test:e2e` must pass after **every** step - not only in step 1. The e2e smoke test is extended in each step that changes the flow, so it always covers the complete flow implemented so far (home → setup → ... → abort/end game).
+   - Run the e2e test like the CI does, against the production build: `npm run build`, then `CI=1 npx playwright test` (PowerShell: `$env:CI='1'; npx playwright test`). Without `CI`, Playwright reuses any dev server already running on port 8080 - possibly another app or a stale build.
+   - The `image` version in `.github/workflows/test-e2e.yml` (`mcr.microsoft.com/playwright:v<version>-noble`) must equal the installed `@playwright/test` version (`package-lock.json`), otherwise the CI e2e test fails ("Playwright version mismatch"). Check this after every `npm install` - a fresh `npm install` often resolves a newer Playwright version than the reference app's workflow uses.
 
 ## Phase A: Gather and Transcribe Sources
 
@@ -105,22 +107,22 @@ Copy the framework files from the recent reference app chosen in the plan and ad
 - Minimal stubs: `store/state.ts` (`language`, `baseFontSize`, `setup: { debugMode? }`, empty `turns`/`rounds`, `resetGame()`), `util/NavigationState.ts` (route params only), `components/round|turn/SideBar.vue` and `DebugInfo.vue`, `components/structure/FooterButtons.vue` and `AppIcon.vue`, `services/enum/Player.ts`.
 - Test stubs: `tests/unit/helper/mockState.ts`, `mockRouteLocation.ts`, `mockTurn.ts`/`mockRound.ts`, `tests/unit/util/NavigationState.spec.ts`; `tests/e2e/smoke-test.spec.ts` covering home → setup → abort game.
 - **Locale files `en.json` and `de.json`** containing only the keys used on the existing screens (shared keys `gameTitle`, `home`, `setup.title`, `action`, `footer`, `serviceWorkerUpdatedRefresh`, `notfound`). `de.json` must have identical keys (lint checks this). Game title and terms as in the EN/DE rulebooks.
-- App icon: `public/img/icons/app-icon.png` (+ `resources/app-icon.psd` source if available) → `npm run generate-pwa-assets`; `public/favicon.ico`, `public/img/icons/favicon.svg`; `src/assets/game-<appDeployName>.webp`; `src/assets/kofi_button_dark.png`. Ask the user for the images; use clearly marked placeholders until provided.
+- App icon: `public/img/icons/app-icon.png` (+ `resources/app-icon.psd` source if available) → `npm run generate-pwa-assets` (generates the PWA icons and `public/img/icons/favicon.ico`); `src/assets/game-<appDeployName>.webp` (game box image, max 800 px on the longer side so it fits into an 800×800 box, aspect ratio of the box cover - a placeholder uses the same limit, e.g. 600×800); `src/assets/kofi_button_dark.png`. Ask the user for the images; use clearly marked placeholders until provided. `public/favicon.ico` and `public/img/icons/favicon.svg` are the generic brdgm.me icon, identical in all apps: copy them unchanged from the reference app, never replace them or create placeholders for them.
 
 **Remove all leftovers of the reference app** (game-specific components, enums, i18n keys, icons, texts in stubs, e2e steps).
 
-Validate: `npm install`, `npm run lint`, `npm run test:unit run`, `npm run build`, `npm run test:e2e`; start `npm run dev` and check home, setup, credits, language switch.
+Validate: `npm install`, align the Playwright image in `test-e2e.yml` with the installed `@playwright/test` version, `npm run lint`, `npm run test:unit run`, `npm run build`, e2e test in CI mode (see "Working Mode" 5); start `npm run dev` and check home, setup, credits, language switch.
 
 ## Step 2: Assets and Icons
 
 The user usually extracts the icons from the rulebook PDF (card symbols, action icons, resources, ...). Support this step by:
 
 - Starting from the **icon list of the plan**: a checklist of all needed icons, grouped by type, with the planned file names (the `{icon-name}`s from `<resources>/glossary.md`). File names must match the **future enum values** (kebab-case), because they are loaded via `<AppIcon type="<type>" :name="enumValue"/>` → `src/assets/icons/<type>/<name>.<ext>`.
-- Format: **SVG** if the rulebook provides vector graphics (default in `south-tigris-*`), otherwise **WebP** (default in `seti`, `maracaibo`, `galactic-cruise`). Set the `extension` default in `AppIcon.vue` to the predominant format. Raster icons are typically ~50-200 px high (larger only for card-like images); the game box image is ~800 px.
+- Format: **SVG** if the rulebook provides vector graphics (default in `south-tigris-*`), otherwise **WebP** (default in `seti`, `maracaibo`, `galactic-cruise`). Set the `extension` default in `AppIcon.vue` to the predominant format. Raster icons are typically ~50-200 px high (larger only for card-like images); the game box image fits into an 800×800 box (max 800 px on the longer side).
 - Common icons in `src/assets/icons/`: `help-semi-transparent.webp` (copy from a reference app, used by `ActionBox`), plus game-specific ones.
 - If the user asks for it, help extracting images from the PDFs in `<resources>/rules/` with available tools; otherwise just provide the checklist and verify that the files the user added match the expected names.
 
-Validate: check the list of missing/unexpected files against the checklist.
+Validate: check the list of missing/unexpected files against the checklist; lint, unit tests, build and e2e test still pass.
 
 ## Step 3: Card Definitions
 
@@ -130,7 +132,7 @@ Validate: check the list of missing/unexpected files against the checklist.
 - **Multiple decks**: either one `Card`/`Cards` with a `CardType`/`DeckType` enum (`grand-austria-hotel`, `south-tigris-inventors`) or separate card classes per deck/bot (`maracaibo`: `jacques/JacquesCards.ts`, `jean/JeanCards.ts`; `seti`: `Cards.ts` + `Objectives.ts`).
 - Unit test `tests/unit/services/Cards.spec.ts`: `get(id)` and expected card counts per deck.
 
-Validate: lint, unit tests. Ask the user to double check card data against the physical cards/rulebook (summarize counts per type).
+Validate: lint, unit tests, build, e2e test. Ask the user to double check card data against the physical cards/rulebook (summarize counts per type).
 
 ## Step 4: Core Services
 
@@ -139,7 +141,7 @@ Validate: lint, unit tests. Ask the user to double check card data against the p
 - Other bot state services from the plan (resources, tracks, markers, ...) using the same `new`/`fromPersistence`/`toPersistence` pattern; `util/getDifficultyLevelSettings.ts` if difficulty levels exist.
 - Thorough unit tests (`CardDeck.spec.ts`: new deck counts, draw order, reshuffle, persistence round trip) using fixed card IDs.
 
-Validate: lint, unit tests with good coverage of the services.
+Validate: lint, unit tests with good coverage of the services, build, e2e test.
 
 ## Step 5: Screens - Setup, Game Flow, End of Game
 
@@ -151,7 +153,7 @@ Implement step by step, each sub-step runnable and committed separately.
 2. **Bot setup instructions** (`SetupBot.vue`, sometimes `SetupGameBoard.vue`): numbered `setupBot.instructions.*` list as in the solo rulebook (texts depending on difficulty/expansions, wording from the EN/DE rulebooks, components managed by the app marked as such - in particular the solo cards and the solo board or the parts of it that are not needed anymore; the parts still needed physically are named explicitly), "rule changes" summary in `alert alert-info`, "Start Game" button that initializes the bot persistence (`CardDeck.new(...)`, ...) and stores the first turn/round, then routes to the first game screen.
 3. **Optional randomizer** to help setting up the board (random tiles/goals/setup cards) using `randomEnum`/`rollDice`/lodash `shuffle`, generated when leaving the general setup and stored in `state.setup` so it survives reloads: see `seti` (`getRandomGoldScoreTileSetup` in `SetupApp.vue`, displayed by `GoldScoringTiles.vue` in `SetupGameBoard.vue`), `galactic-cruise` (`getActionSetup`, `getDevelopmentSetup`, `components/setup/GameSetup.vue`).
 
-Update the smoke test to go through setup.
+Update the smoke test to go through all setup screens up to the first game screen.
 
 ### 5b. Game Flow
 
