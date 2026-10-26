@@ -9,7 +9,8 @@ A brdgm.me solo helper is **not a "card flipper"**. It replaces the solo deck(s)
 - The app tracks all bot state that does not depend on the board: resources, VP, tracks, markers, cards/tokens owned, counters, which rules/bonuses were already triggered, ...
 - The app evaluates bot decisions (priorities, tie breakers, conditions, fallbacks) whenever they can be derived from tracked state.
 - The player only gives input when the **board state must be inspected** (e.g. "is the target space free?", "which tile is closest?") or when the input comes from the player's actions (e.g. silver paid to the bot, player passed). Such inputs are asked as late and as simple as possible (one click, `NumberInput`, "Executed" / "Not Possible").
-- The player still follows the full game flow; the app tells them exactly what to do for the bot on the board.
+- The player still follows the full game flow; the app tells them exactly what to do for the bot on the board - and **only** that: nothing the app does automatically is shown as an instruction.
+- Bot actions are shown as **colored action tiles with the solo card iconography**, **one action per screen** (full rules text on click), see "Bot Turn Display" in the plan template.
 - Ideally the player needs **neither the solo cards nor the solo board**. Physical solo components are only kept where they are really needed (e.g. a place for things the bot collects).
 
 ## 1. Read the Sources
@@ -39,7 +40,7 @@ For each deck:
   - Use the identifier printed on the card - a number (`12`) or a combination of letters and numbers (`A1`, `B12`, `S3`), which is often used to distinguish card types, decks, difficulty levels or variants.
   - If there is none, define an own scheme in the same spirit (e.g. sequential numbers in the order of the card sheet in the rulebook, or a letter prefix per deck/type like `A1`…`A12`, `B1`…`B8`).
   - Type: `number` for purely numeric identifiers, `string` for anything else.
-  - Document the scheme in `cards/<deck>-cards.md`, as a comment in `Cards.ts` and in the plan, and show the identifiers in `DebugInfo` so the user can cross-check against the physical cards.
+  - Document the scheme in `cards/<deck>-cards.md`, as a comment in `Cards.ts` and in the plan, and show the current card (full JSON incl. its identifier) in `DebugInfo` so the user can cross-check against the physical cards.
 - Card front: every icon/field and its meaning (from the rules' icon glossary), the order of actions, parameters, conditions, priorities, fallbacks ("if not possible, ...").
 - **Card back**: information visible to the player before the card is drawn (color, symbols, next action type, direction indicator).
 - Result: the **card table** in `cards/<deck>-cards.md` (id, deck/type, back, actions with parameters) covering all cards. Mark every icon or combination that is unclear and ask the user.
@@ -111,7 +112,7 @@ Present the plan to the user in this structure (concise, tables preferred):
 5. **Solo board and other solo components**: component/area | purpose in the rules | replaced by the app / still needed physically (and why). Summary which physical solo components the player still needs.
 6. **Bot state** to persist (draft of `BotPersistence` and other state in `state.ts`).
 7. **Solo decks**: build rules, card identifier scheme, reference to the card tables in `cards/<deck>-cards.md`, card back information.
-8. **Bot actions**: list of `Action` values with the automated logic and the remaining player input; "if not possible" handling.
+8. **Bot actions**: list of `Action` values with the automated logic (incl. conditions/branches decided by the app) and the remaining player input; "if not possible" handling. **Bot turn display**: one colored action tile per screen with the solo card iconography and resolved values, full rules text in a modal on click; which actions get a screen (only actions the player carries out, none for fully automated effects); which important automated effects are shown as notices; buttons per action ("Executed"/"Not Possible", selections, "Next").
 9. **Sidebar** contents and **preserved physical hints**.
 10. **Setup screens** (general setup, bot setup instructions incl. needed/not needed solo components, randomizer).
 11. **End game scoring**: table scoring category | player (entered) | bot (calculated / entered / not scored); statistics if Karma Games.

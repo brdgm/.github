@@ -155,6 +155,7 @@ npm run generate-pwa-assets  # Generate PWA icons from public/img/icons/app-icon
 - `App.vue` renders `<router-view :key="$route.fullPath"/>`, so each view is re-created on every navigation.
 - **`util/NavigationState.ts`**: Constructed in each view's `setup()` via `new NavigationState(route, state)`. Reads route params with `getIntRouteParam`, restores bot state from the persisted previous turn (or initial setup), and executes the deterministic bot step (e.g. drawing the next card). Views never keep game progression in local state.
 - On "Next": build the turn object (incl. `xxx.toPersistence()`), call `state.storeTurn(...)`, then `router.push(nextRoute)`. "Back" just navigates to the previous route - state is re-derived from the store.
+- **Every decision can be undone with "Back"**: "Back" leads to the previous screen the player actually saw, and that screen shows the state **before its own decision**, so the player can decide again (e.g. after a misclick). Each screen derives its state only from the persisted state of the previous step (previous turn/round, or the decisions of the earlier steps of the same turn) - never from the stored result of its own decision. Watch out when a decision on step N completes the turn and the app jumps directly to the next turn: "Back" from there must return to step N without that decision, never to a "result" screen with the decision already applied. The reference apps follow this (`seti`, `south-tigris-scholars`: "Back" to the bot turn re-derives it from the previous turn). Cover it with `RouteCalculator`/`NavigationState` unit tests and a "Back" check in the e2e smoke test.
 - Use `services/RouteCalculator.ts` when next/back routes depend on turn order or passing.
 
 ### Game Services
@@ -263,6 +264,16 @@ Rules:
 - Imports via `@/` alias; one default export per file; JSDoc comments on services and non-trivial functions.
 - TypeScript strict mode; prefer immutable/functional logic in services (`readonly` getters, `toSorted`, `map`/`filter`/`reduce`).
 - 2-space indentation, UTF-8, final newline (`.editorconfig`).
+
+### File Encoding (UTF-8)
+
+All files (code, locale JSON, Markdown in `brdgm-resources`) are **UTF-8 without BOM**. German texts (ä, ö, ü, ß), `°`, `★`, typographic quotes etc. must survive every edit - a single `?` or `Ã¤` in `de.json` or a transcription is a bug.
+
+- Create and change files with the **file create/edit tools** - never via shell output. In Windows PowerShell 5.1:
+  - Piping text into a native process (`'@ | python -`, `... | node`) uses `$OutputEncoding` (ASCII) and turns every non-ASCII character into `?`.
+  - `Set-Content`/`Out-File -Encoding UTF8` writes a BOM, `>`/`Out-File` without encoding writes UTF-16, `Get-Content` without `-Encoding UTF8` reads UTF-8 as ANSI (`Ã¤`).
+- If a script is really needed (bulk JSON changes, checks): write the script file with the create tool, run it with `python -X utf8 script.py`, and open files with `encoding='utf-8'` (`json.dump(..., ensure_ascii=False)`). Never put non-ASCII text inline into a PowerShell command or here-string.
+- After changing locale files or transcriptions, **verify** that no characters were replaced: search the changed files for `[A-Za-zäöü]\?[a-zäöüß]`, `Ã`, `Â`, `â€` and `\uFFFD` - there must be no hits (except URLs with query strings). Fix every hit before finishing.
 
 ## Code Quality Guidelines
 

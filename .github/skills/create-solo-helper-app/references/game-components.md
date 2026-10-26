@@ -46,7 +46,7 @@ Every file starts with:
 
 ## What to Include
 
-- **All rules text, complete and verbatim** - no summaries, no paraphrasing, no "translation" between languages. Wording must be usable for 1:1 fragments in `en.json`/`de.json`. Fix only extraction artifacts (hyphenation, broken lines, ligatures, column mix-ups).
+- **All rules text, complete and verbatim** - no summaries, no paraphrasing, no "translation" between languages. Wording must be usable for 1:1 fragments in `en.json`/`de.json`. Fix only extraction artifacts (hyphenation, broken lines, ligatures, column mix-ups). Keep umlauts and special characters exactly (UTF-8 without BOM, see "File Encoding (UTF-8)" in `copilot-instructions.md`) - PDF extraction output read or written through PowerShell easily turns `ü` into `?` or `Ã¼`.
 - **EN mandatory, DE if available** - one file per language, with the **same heading structure, order and page markers**, so passages can be matched between languages.
 - Setup, game flow, all rules sections, scoring, icon glossaries, FAQ/clarifications, rule boxes and sidebars, variants, difficulty levels, expansion rules relevant for the solo mode.
 - **Examples only if they contain additional rule-specific instructions** (e.g. a clarification of an edge case). Then keep the example text as a blockquote: `> **Example:** ...`.
@@ -110,7 +110,7 @@ One file per solo component besides the solo cards (solo board, solo mat, bot ti
 1. Extract the text with available tools (e.g. Python `pypdf`/`pdfplumber`, `pymupdf` for page renders); install them into a temporary virtual environment in the session folder, not in the app repo. Long rulebooks can be transcribed file by file (e.g. one subagent per PDF/language) to keep the context small.
 2. Render the pages to images and **compare** them with the extracted text - extraction often mixes columns, drops icons, breaks umlauts/ligatures and loses tables. Fix the Markdown accordingly. Look at the page images for card sheets, icon glossaries, setup diagrams and solo boards.
 3. Write the files following the conventions above; resolve every inline icon to a `{icon-name}` in the glossary.
-4. **Verify completeness**: every page of the source has its page marker, no rules section is missing, EN and DE files have the same structure, every card of every deck is in the card table.
+4. **Verify completeness**: every page of the source has its page marker, no rules section is missing, EN and DE files have the same structure, every card of every deck is in the card table. **Verify the encoding**: no replaced umlauts or special characters (`?`, `Ã`, `Â`, `â€`, `\uFFFD`), no BOM.
 5. Collect **all** uncertainties (illegible text, unclear icons, differences between EN and DE, assumptions from images, invented icon names, and every uncertainty reported by subagents) in `clarifications.md`, mark them with `TODO (C<n>)`, and **ask the user about each one** (see "Clarifications"). Ask the user to spot check the transcription. When delegating transcription to subagents, instruct them to mark uncertainties with `TODO` and to report them; then add the reported ones to `clarifications.md`.
 
 Later phases use these files as the primary source. Go back to the PDFs/page images only for visual questions. If an error in a transcription is found later, fix the Markdown file. Suggest a commit message for `brdgm-resources` after the transcription.
