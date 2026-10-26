@@ -47,7 +47,7 @@ Rules for the split between `setup()` and the options:
 
 - No direct DOM access (`document.querySelector`, `getElementById`, `classList`) in components - use bindings, template refs (`ref="x"` + `this.$refs.x`) or brdgm-commons helpers (`showModal(id)`).
 - Modals: always `ModalDialog`; open via `data-bs-toggle="modal" data-bs-target="#id"` or `showModal(id)`. Unique IDs for modals in reusable components via `` `modal-${useId()}` `` (instead of `nanoid`).
-- Use `<button type="button">` for actions. Clickable non-button elements (e.g. the `ActionBox` that opens rules help) need `role="button"`, `tabindex="0"` and `@keydown.enter` (Sonar MouseEventWithoutKeyboardEquivalentCheck, found in almost every app). Do not nest clickable elements with the same handler. `<a href="#">` only together with `data-bs-toggle` (Bootstrap prevents the navigation) or `@click.prevent`.
+- Use `<button type="button">` for actions - also for clickable tiles and cards (e.g. the `ActionBox` that opens rules help): a real `<button>` with reset styles (`font: inherit`, own border/background, `text-align`) and only phrasing content inside (`<span>`s with `display: block/flex` instead of `<div>`s). Do not use `role="button"` + `tabindex` + `@keydown.enter` on a `<div>` (Sonar S6819 "Use <button> instead of the button role"). Likewise use native elements instead of ARIA roles: `<output>` (with `d-block`) for status notices instead of `role="status"`, `<img>`/`<svg>` with `<title>` instead of `role="img"`. Do not nest clickable elements with the same handler. `<a href="#">` only together with `data-bs-toggle` (Bootstrap prevents the navigation) or `@click.prevent`.
 - `v-for` always with `:key`; use a stable domain key (card ID, enum value) where available. Index keys only for static lists that never change while the view is shown. Never `v-if` on the same element as `v-for`.
 - Keep templates simple - move complex expressions into computed properties.
 - Images: `alt=""` for decorative icons; meaningful `alt` if the image carries information not available as text. Inline `<svg>` icons need `aria-hidden="true"` (decorative) or an `aria-label` (Sonar ImgWithoutAltCheck).
@@ -71,6 +71,6 @@ Rules for the split between `setup()` and the options:
 | `// eslint-disable-line @typescript-eslint/no-unused-vars` on emits | most apps since 2024 | `argsIgnorePattern: '^_'` in ESLint config |
 | `Object.values(Enum)` | `ExpansionsSetup.vue` in many apps | `getAllEnumValues` |
 | `document.querySelector(...)` in components | `bloomworks` `PlayerMakeDelivery.vue`, `clans-of-caledonia` `RoundTurnBot.vue` | bindings, template refs, `showModal` |
-| Clickable `<div>` without keyboard support | `ActionBox.vue` in most apps | `role="button"`, `tabindex="0"`, `@keydown.enter` |
+| Clickable `<div>` without keyboard support | `ActionBox.vue` in most apps | `<button type="button">` with reset styles (not `role="button"` on a `<div>`, Sonar S6819) |
 | VP formulas inline in `FinalScoring.vue`, untested | `seti`, `south-tigris-scholars` | `util/getXxxVP.ts` with tests |
 | `nanoid` for element IDs | recent apps | Vue `useId()` |

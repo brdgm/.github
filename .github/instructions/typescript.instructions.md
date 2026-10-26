@@ -37,6 +37,8 @@ SonarCloud analyzes every PR. Avoid these issues found repeatedly in the apps:
 
 - Existence checks with `.some(...)` instead of `.find(...)` or `.filter(...).length > 0` (S7754).
 - Default-exported functions are named: `export default function getStarLimit(...)`, never an anonymous `export default (...) => ...` (S7726).
+- Constant lookup lists and collections only used for existence checks are a `Set` with `.has()`, not an array with `.includes()` (S7776).
+- No nested template literals, e.g. ``t(`rules.${t(`...`)}`)`` - build the inner key in a separate variable/computed (S4624).
 
 ## Do Not Copy (known smells in existing apps)
 
