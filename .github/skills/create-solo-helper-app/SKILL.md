@@ -53,6 +53,7 @@ The app is built **incrementally**: first Phase A and B (sources and their trans
 5. Keep the app **runnable after every step**: `npm run lint`, `npm run test:unit run`, `npm run build` and `npm run test:e2e` must pass after **every** step - not only in step 1. The e2e smoke test is extended in each step that changes the flow, so it always covers the complete flow implemented so far (home → setup → ... → abort/end game).
    - Run the e2e test like the CI does, against the production build: `npm run build`, then `CI=1 npx playwright test` (PowerShell: `$env:CI='1'; npx playwright test`). Without `CI`, Playwright reuses any dev server already running on port 8080 - possibly another app or a stale build.
    - The `image` version in `.github/workflows/test-e2e.yml` (`mcr.microsoft.com/playwright:v<version>-noble`) must equal the installed `@playwright/test` version (`package-lock.json`), otherwise the CI e2e test fails ("Playwright version mismatch"). Check this after every `npm install` - a fresh `npm install` often resolves a newer Playwright version than the reference app's workflow uses.
+6. **Token budget - ask before expensive work**: before work that needs many images (scans, card sheets, icon extraction from PDFs) or many parallel subagents, give the user a short effort assessment (what, how many images/agents, low/medium/high) with options and a recommendation, and let the user choose. Prefer text over images, one image view per page, small subagent tasks with a fresh context and exact inputs (see "Procedure" in [game-components.md](./references/game-components.md)). Report and ask again if something turns out more expensive than estimated.
 
 ## Phase A: Gather and Transcribe Sources
 
@@ -79,6 +80,8 @@ Then **transcribe the sources to Markdown** next to the source files in `<resour
 - `cards/`: one card table per solo deck (every card, front and back, with identifiers).
 - `components/`: solo board and other solo components with all areas and their purpose.
 - `glossary.md`: EN/DE terms and icon names (`{icon-name}`, future enum values/icon file names).
+
+**Keep the transcription lean** - it is by far the most token-intensive part of the skill (scans can only be read as images). Follow "Procedure" in [game-components.md](./references/game-components.md): inventory with [scripts/prepare-sources.py](./scripts/prepare-sources.py) first, then **ask the user** with the effort per source and a recommended scope (e.g. scans fully / solo-relevant parts only / later) before starting, extract text and page renders once centrally, delegate small bounded tasks with an image budget, write incrementally. Work only with this game's sources - do not read the resources of other apps as examples; the conventions in `game-components.md` are sufficient.
 
 Verify completeness against the PDFs. Collect all uncertainties in `clarifications.md` and ask the user about each of them (decide, or add to the list to clear up later - see "Clarifications" in [game-components.md](./references/game-components.md)), and ask the user to spot check. Nothing of this goes into the app repo.
 

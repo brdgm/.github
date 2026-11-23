@@ -107,10 +107,33 @@ One file per solo component besides the solo cards (solo board, solo mat, bot ti
 
 ## Procedure
 
-1. Extract the text with available tools (e.g. Python `pypdf`/`pdfplumber`, `pymupdf` for page renders); install them into a temporary virtual environment in the session folder, not in the app repo. Long rulebooks can be transcribed file by file (e.g. one subagent per PDF/language) to keep the context small.
-2. Render the pages to images and **compare** them with the extracted text - extraction often mixes columns, drops icons, breaks umlauts/ligatures and loses tables. Fix the Markdown accordingly. Look at the page images for card sheets, icon glossaries, setup diagrams and solo boards.
-3. Write the files following the conventions above; resolve every inline icon to a `{icon-name}` in the glossary.
-4. **Verify completeness**: every page of the source has its page marker, no rules section is missing, EN and DE files have the same structure, every card of every deck is in the card table. **Verify the encoding**: no replaced umlauts or special characters (`?`, `Ã`, `Â`, `â€`, `\uFFFD`), no BOM.
-5. Collect **all** uncertainties (illegible text, unclear icons, differences between EN and DE, assumptions from images, invented icon names, and every uncertainty reported by subagents) in `clarifications.md`, mark them with `TODO (C<n>)`, and **ask the user about each one** (see "Clarifications"). Ask the user to spot check the transcription. When delegating transcription to subagents, instruct them to mark uncertainties with `TODO` and to report them; then add the reported ones to `clarifications.md`.
+Transcription is the most token-intensive part of the whole skill. **Images are the cost driver**: every page image or crop an agent views stays in its context and is re-sent with every following step - so the cost of an agent grows with (images viewed) × (steps after them). Text from a PDF text layer is cheap. Work lean:
+
+1. **Inventory first** (cheap, no images): run [scripts/prepare-sources.py](../scripts/prepare-sources.py) `inventory <resources>` (`python -X utf8`, needs `pymupdf`; install into a temporary venv in the session folder if missing). It lists every PDF with page count, text layer or scan, garbled spans and an effort estimate.
+2. **Ask the user how to proceed** (ask-questions tool) - present the inventory table with the effort per source, a recommended scope and the options, e.g.:
+   - text-layer PDFs (low effort): transcribe fully;
+   - scans (high effort, one image per page plus crops): fully / only the solo-relevant parts (solo rules, solo cards, solo board) / only terms for the glossary / later;
+   - expansions, fan-made/unofficial material: fully / only solo-relevant rules and deviations from the official rules / skip for now;
+   - DE versions: fully (needed for 1:1 wording in `de.json`) / only solo rules + terms.
+
+   Never start a high-effort source without this decision.
+3. **Prepare once, centrally**: `prepare-sources.py extract <resources> <session-folder>/sources` writes the text of all text-layer PDFs (garbled `WKH`-style spans already decoded) and page renders at moderate resolution. Write a shared `{icon-name}` vocabulary (from the rulebook's icon legend) and one short common instruction file for subagents to the session folder. Subagents reuse these - nobody extracts or renders again.
+4. **Transcribe**:
+   - Text-layer PDFs: transcribe from the extracted text. Look at a page image only for pages with figures, icon-only rules or tables - not for every page.
+   - Scans: view each page image **once** at normal resolution. Crops only for specific values that are not legible (card values, track spaces), at most ~2-3 per page, ~250 dpi, combining several details in one crop. If still unreadable: `TODO (C<n>)` instead of zooming further - the user can check the physical component.
+   - Card sheets and solo boards: one overview image per sheet, then targeted crops of the card headers/value areas only. Write the card table right away, card by card.
+5. **Delegating to subagents** (learnings):
+   - **Small, bounded tasks with a fresh context**: one document (≤ ~6 scan pages) per agent; split long scans (e.g. 16 pages → 3-4 agents by page range). The coordinator's long context is more expensive than a fresh subagent.
+   - The prompt lists the **exact input files** (text file, page images, icon vocabulary, format template) and says "read nothing else": no other apps' resources, no full rulebook "for context" unless the task needs it. Use the first finished file of **this** app as format template.
+   - Give an **image budget** ("view each page image once, at most N crops") and the TODO fallback.
+   - **Write incrementally** (create the file after the first page, then append per page with the edit tool), so an interruption (cancel, IDE crash) loses no work. On restart, tell the agent to continue from the existing file, not from scratch.
+   - **Short final report**: files written, TODOs, new icon names and terms - no data dumps.
+   - **No duplicate work**: the coordinator does not view the page images of delegated sources itself, and does not delegate what it already did. Check output files (page markers) instead of re-reading sources.
+   - Run independent agents in parallel, but check after a few minutes that they produce output (file size grows); stop an agent that has not written anything instead of letting it run.
+6. **Ask back on the way** if a source turns out more expensive than estimated (e.g. many unreadable details, a scan of poor quality): report the status and offer to continue / reduce the scope / mark the rest as TODO.
+7. Write the files following the conventions above; resolve every inline icon to a `{icon-name}` in the glossary.
+8. **Verify completeness**: every page of the source has its page marker, no rules section is missing, EN and DE files have the same structure, every card of every deck is in the card table. Check page markers with a script, not by re-reading. **Verify the encoding**: no replaced umlauts or special characters (`?`, `Ã`, `Â`, `â€`, `\uFFFD`), no BOM.
+9. Collect **all** uncertainties (illegible text, unclear icons, differences between EN and DE, assumptions from images, invented icon names, and every uncertainty reported by subagents) in `clarifications.md`, mark them with `TODO (C<n>)`, and **ask the user about each one** (see "Clarifications"). Ask the user to spot check the transcription. Subagents use their own TODO prefix (e.g. `TODO (C-D1)`) to avoid collisions; the coordinator renumbers them when creating `clarifications.md` and merges duplicates (e.g. the same question in the EN and DE file).
+10. Delete temporary crops; keep the extracted text and page renders in the session folder for later lookups.
 
 Later phases use these files as the primary source. Go back to the PDFs/page images only for visual questions. If an error in a transcription is found later, fix the Markdown file. Suggest a commit message for `brdgm-resources` after the transcription.
